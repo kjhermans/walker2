@@ -68,16 +68,13 @@ EXT_error(int err_id, char *modname, char *msg)
 #define MOVSPD 4
 
 static struct PL_OBJ *floortile;
-//static struct PL_OBJ *texcube;
 static struct PL_OBJ *bluecube;
 static struct PL_OBJ *redcube;
 static struct PL_OBJ *yellowcube;
 static struct PL_OBJ *greencube;
-//static struct PL_OBJ *imported;
-static int camrx = 0, camry = 0;
-static int x = 0, y = 200, z = 90;
-static int rot = 1;
-//static int sinvar = 0;
+static int camrx = 1, camry = 1;
+static int vv = 0;
+static int x = 0, y = 1000, z = 90;
 static struct PL_TEX checktex;
 static int checker[PL_REQ_TEX_DIM * PL_REQ_TEX_DIM];
 static unsigned fpsclock = 0;
@@ -118,120 +115,134 @@ init(void)
 {
     maketex();
 
-//	PL_texture(&checktex);
-//	texcube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 255, 255, 255);
-//	PL_texture(NULL);
-	floortile = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_TOP, 77, 101, 94);
+//        PL_texture(&checktex);
+//        texcube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 255, 255, 255);
+//        PL_texture(NULL);
+        floortile = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_TOP, 77, 101, 94);
 
-	bluecube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 128, 0, 255);
-	redcube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 255, 0, 0);
-	yellowcube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 128, 128, 0);
-	greencube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 0, 128, 0);
+        bluecube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 128, 0, 255);
+        redcube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 255, 0, 0);
+        yellowcube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 128, 128, 0);
+        greencube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 0, 128, 0);
 
-//	import_dmdl("pots", &imported);
-	
-	PL_fov = 9;
+        PL_fov = 9;
     
     PL_cur_tex = NULL;
-	PL_cull_mode = PL_CULL_BACK;
-	PL_raster_mode = PL_TEXTURED;
-	
-	fpsclock = clk_sample();
+        PL_cull_mode = PL_CULL_BACK;
+        PL_raster_mode = PL_TEXTURED;
+        
+        fpsclock = clk_sample();
 }
 
 static void
 update(void)
 {    
-	if (pkb_key_pressed(FW_KEY_ESCAPE)) {
-		sys_shutdown();
-	}
-	if (pkb_key_held(FW_KEY_ARROW_RIGHT)) {
-		camry += 1;
-	}
-	if (pkb_key_held(FW_KEY_ARROW_LEFT)) {
-		camry -= 1;
-	}
-	if (pkb_key_held(FW_KEY_ARROW_UP)) {
-		camrx -= 1;
-	}
-	if (pkb_key_held(FW_KEY_ARROW_DOWN)) {
-		camrx += 1;
-	}
+        if (pkb_key_pressed(FW_KEY_ESCAPE)) {
+                sys_shutdown();
+        }
+        if (pkb_key_held(FW_KEY_ARROW_RIGHT)) {
+                camry += 1;
+        }
+        if (pkb_key_held(FW_KEY_ARROW_LEFT)) {
+                camry -= 1;
+        }
+        if (pkb_key_held(FW_KEY_ARROW_UP)) {
+                camrx -= 1;
+        }
+        if (pkb_key_held(FW_KEY_ARROW_DOWN)) {
+                camrx += 1;
+        }
 
-	if (pkb_key_held('w')) {
-		x += (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
-		y -= (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
-		z += (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
-	}
-	if (pkb_key_held('s')) {
-		x -= (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
-		y += (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
-		z -= (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
-	}
-	if (pkb_key_held('a')) {
-		x -= (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
-		z += (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
-	}
-	if (pkb_key_held('d')) {
-		x += (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
-		z -= (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
-	}
-	if (pkb_key_held('t')) {
-		y += MOVSPD;
-	}
-	if (pkb_key_held('g')) {
-		y -= MOVSPD;
-	}
-	if (pkb_key_held('l')) { /* 'level' */
-		camrx = 0;
-	}
-	if (pkb_key_held('n')) { /* 'north' */
-		camry = 0;
-	}
-	if (pkb_key_pressed('c')) {
-		static int cmod = PL_CULL_BACK;
-		if (cmod == PL_CULL_BACK) {
-			cmod = PL_CULL_NONE;
-		} else if (cmod == PL_CULL_FRONT) {
-			cmod = PL_CULL_BACK;
-		} else {
-			cmod = PL_CULL_FRONT;
-		}
-		PL_cull_mode = cmod;
-	}
-	if (pkb_key_held('1')) {
-	    PL_raster_mode = PL_FLAT;
-	}
-	if (pkb_key_held('2')) {
-	    PL_raster_mode = PL_TEXTURED;
-	}
+        if (pkb_key_held('w')) {
+                x += (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
+                y -= (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
+                z += (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
+        }
+        if (pkb_key_held('s')) {
+                x -= (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
+                y += (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
+                z -= (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
+        }
+        if (pkb_key_held('a')) {
+                x -= (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
+                z += (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
+        }
+        if (pkb_key_held('d')) {
+                x += (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
+                z -= (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
+        }
+        if (pkb_key_held('t')) {
+                y += MOVSPD;
+        }
+        if (pkb_key_held('g')) {
+                y -= MOVSPD;
+        }
+        if (pkb_key_held('l')) { /* 'level' */
+                camrx = 0;
+        }
+        if (pkb_key_held('n')) { /* 'north' */
+                camry = 0;
+        }
+        if (pkb_key_pressed('c')) {
+                static int cmod = PL_CULL_BACK;
+                if (cmod == PL_CULL_BACK) {
+                        cmod = PL_CULL_NONE;
+                } else if (cmod == PL_CULL_FRONT) {
+                        cmod = PL_CULL_BACK;
+                } else {
+                        cmod = PL_CULL_FRONT;
+                }
+                PL_cull_mode = cmod;
+        }
+        if (pkb_key_held('1')) {
+            PL_raster_mode = PL_FLAT;
+        }
+        if (pkb_key_held('2')) {
+            PL_raster_mode = PL_TEXTURED;
+        }
 
-	if (pkb_key_pressed('3')) {
-		if (PL_fov == 8) {
-		    PL_fov = 9;
-		} else {
-		    PL_fov = 8;
-		}
-		printf("fov: %d\n", PL_fov);
-	}
+        if (pkb_key_pressed('3')) {
+                if (PL_fov == 8) {
+                    PL_fov = 9;
+                } else {
+                    PL_fov = 8;
+                }
+                printf("fov: %d\n", PL_fov);
+        }
 
-	if (pkb_key_pressed(' ')) {
-		rot = !rot;
-	}
-	//sinvar++;
+        if (pkb_key_pressed(' ')) { /* jump */
+          vv = -50;
+        }
+
+  { /* perform falling check */
+    int xx = (x + (CUSZ/2)) / CUSZ;
+    int zz = (z + (CUSZ/2)) / CUSZ;
+    int yy = (y / CUSZ) - 1;
+    struct pillar pillar;
+    pillar_get(xx, zz, &pillar);
+    if (yy < (int)(pillar.height)) {
+      vv = 0;
+      y = ((pillar.height+1) * CUSZ) + 100;
+    } else if (yy > (int)(pillar.height)) {
+      if (vv < 50) {
+        vv++;
+      }
+    }
+    if (vv) {
+      y -= vv;
+    }
+  }
+
 }
 
 static void
 display(void)
 {
-//    int i = 0, j = 0;
-//    int p1 = PL_P_ONE;
-//    int mo;
 
     /* clear viewport to black */
-	PL_clear_vp(0, 0, 0);
-	//PL_clear_vp(128, 128, 128);
-	PL_polygon_count = 0;
+        PL_clear_vp(0, 0, 0);
+        //PL_clear_vp(128, 128, 128);
+        PL_polygon_count = 0;
     
     /* define camera orientation */
     PL_set_camera(x, y, z, camrx, camry);
@@ -239,13 +250,22 @@ display(void)
 {
   int xx = x / CUSZ;
   int zz = z / CUSZ;
-  unsigned pillar[ PILLAR_SIZE ];
+  struct pillar pillar;
   struct PL_OBJ* obj = NULL;
   for (int i = xx - (FIELD_SIZE/2); i < xx + (FIELD_SIZE/2); i++) {
     for (int j = zz - (FIELD_SIZE/2); j < zz + (FIELD_SIZE/2); j++) {
-      pillar_get(i, j, pillar);
+      { /* floortile */
+            PL_mst_push();
+            PL_mst_translate(
+                       i * CUSZ,
+                       0,
+                       j * CUSZ);
+            PL_render_object(floortile);
+            PL_mst_pop();
+      }
+      pillar_get(i, j, &pillar);
       for (unsigned k = 0; k < PILLAR_SIZE; k++) {
-        switch (pillar[ k ]) {
+        switch (pillar.block[ k ]) {
         case 0: goto BREAKPILLAR;
         case 1: obj = bluecube; break;
         case 2: obj = redcube; break;
@@ -256,7 +276,7 @@ display(void)
         if (obj)
         { /* draw textured cube */
             PL_mst_push();
-            PL_mst_translate(i*CUSZ, (k+1)*CUSZ, j*CUSZ);
+            PL_mst_translate(i * CUSZ, (k+1) * CUSZ, j * CUSZ);
             PL_render_object(obj);
             PL_mst_pop();
         }
@@ -266,59 +286,12 @@ BREAKPILLAR:;
   }
 }
     
-//    { /* draw imported model */
-//        PL_mst_push();
-//        if (rot) {
-//            mo = (PL_sin[sinvar & PL_TRIGMSK] * 256) >> PL_P;
-//            PL_mst_translate(mo, 400, 500);
-//        } else {
-//            PL_mst_translate(0, 400, 500);
-//        }
-//        PL_render_object(imported);
-//        PL_mst_pop();
-//    }
-    
-    /* draw tile grid */
-    int i,j;
-    for (i = -GRSZ; i < GRSZ; i++) {
-        for (j = -GRSZ; j < GRSZ; j++) {
-//            if (((i + j) % 2) == 0) {
-            PL_mst_push();
-            PL_mst_translate(
-                       0 + i * CUSZ,
-                       0,
-                     600 + j * CUSZ);
-            PL_render_object(floortile);
-            PL_mst_pop();
-//            }
+        if (clk_sample() > fpsclock) {
+            fpsclock = clk_sample() + 1000;
+            printf("FPS: %d, x: %d, y: %d, z: %d\n", sys_getfps(), x, y, z);
         }
-    }
 
-//    { /* draw textured cube */
-//        PL_mst_push();
-//        PL_mst_translate(-100, 100, 500);
-//        if (rot) {
-//            PL_mst_rotatex(sinvar >> 2);
-//            PL_mst_rotatey(sinvar >> 1);
-//            PL_mst_scale(p1 * ((sinvar & 0xff) + 128) >> 8, p1, p1);
-//        }
-//        PL_render_object(texcube);
-//        PL_mst_pop();
-//    }
-
-//    { /* draw textured cube */
-//        PL_mst_push();
-//        PL_mst_translate(-200, 200, 600);
-//        PL_render_object(bluecube);
-//        PL_mst_pop();
-//    }
-	
-	if (clk_sample() > fpsclock) {
-	    fpsclock = clk_sample() + 1000;
-	    printf("FPS: %d, x: %d, y: %d, z: %d\n", sys_getfps(), x, y, z);
-	}
-
-	/* update window and sync */
+        /* update window and sync */
     vid_blit();
     vid_sync();
 }

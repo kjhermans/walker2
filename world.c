@@ -8,7 +8,7 @@
 #include "world.h"
 #include "md5.h"
 
-static unsigned pillars[ FIELD_SIZE ][ FIELD_SIZE ][ PILLAR_SIZE ];
+static struct pillar pillars[ FIELD_SIZE ][ FIELD_SIZE ];
 
 static int pillar_offset_x = -(FIELD_SIZE / 2);
 static int pillar_offset_z = -(FIELD_SIZE / 2);
@@ -26,16 +26,12 @@ static
 td_t pillardb;
 
 int pillar_get_cached
-  (int x, int z, unsigned pillar[ PILLAR_SIZE ])
+  (int x, int z, struct pillar* p)
 {
   if (x >= pillar_offset_x && x < pillar_offset_x + FIELD_SIZE
       && z >= pillar_offset_z && z < pillar_offset_z + FIELD_SIZE)
   {
-    memcpy(
-      pillar,
-      pillars[ x - pillar_offset_x ][ z - pillar_offset_z ],
-      sizeof(unsigned) * PILLAR_SIZE
-    );
+    *p = pillars[ x - pillar_offset_x ][ z - pillar_offset_z ];
     return 0;
   }
   //..  fetch it from the db and return 0
@@ -43,7 +39,7 @@ int pillar_get_cached
 }
 
 void pillar_get_new
-  (int x, int z, unsigned pillar[ PILLAR_SIZE ])
+  (int x, int z, struct pillar* p)
 {
   unsigned char pillarseed[ 12 ];
   int32_t xx = x, zz = z;
@@ -57,22 +53,24 @@ void pillar_get_new
   srand(*((unsigned*)rnd));
   for (unsigned i=0; i < PILLAR_SIZE; i++) {
     if ((rand() % 4) == 0) {
+      p->height = i;
       for (; i < PILLAR_SIZE; i++) {
-        pillar[ i ] = 0;
+        p->block[ i ] = 0;
       }
       return;
     }
-    pillar[ i ] = (rand() % 4) + 1;
+    p->block[ i ] = (rand() % 4) + 1;
   }
+  p->height = PILLAR_SIZE;
 }
 
 void pillar_get
-  (int x, int z, unsigned pillar[ PILLAR_SIZE ])
+  (int x, int z, struct pillar* p)
 {
-  if (pillar_get_cached(x, z, pillar) == 0) {
+  if (pillar_get_cached(x, z, p) == 0) {
     return;
   }
-  pillar_get_new(x, z, pillar);
+  pillar_get_new(x, z, p);
 }
 
 void pillar_init
@@ -90,7 +88,7 @@ void pillar_init
       pillar_get_new(
         pillar_offset_x + i,
         pillar_offset_z + j,
-        pillars[ i ][ j ]
+        &(pillars[ i ][ j ])
       );
     }
   }

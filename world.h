@@ -8,8 +8,14 @@
 //#define PILLAR_SIZE 16
 //#define FIELD_SIZE 8
 
+struct pillar
+{
+  unsigned block[ PILLAR_SIZE ];
+  unsigned height;
+};
+
 void pillar_set_seed (uint32_t s);
-void pillar_get (int x, int z, unsigned pillar[ PILLAR_SIZE ]);
+void pillar_get (int x, int z, struct pillar* p);
 void pillar_init ();
 
 #endif
