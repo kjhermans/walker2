@@ -88,6 +88,8 @@ static struct {
          StructureNotifyMask | FocusChangeMask   | \
          ButtonPressMask     | ButtonReleaseMask | PointerMotionMask)
 
+//         ResizeRedirectMask  | \
+
 static void xkey_callb(XKeyEvent *event);
 
 static void close_xdisplay(void);
@@ -180,6 +182,7 @@ open_xdisplay(void)
     setattr.event_mask       = FW_XEVENT_MASK;
     setattr.border_pixel     = BlackPixel(d, FWi_x.screen);
     setattr.background_pixel = setattr.border_pixel;
+    //setattr.override_redirect = 1;
     
     winmask      = CWEventMask;
     FWi_x.window = XCreateWindow(
@@ -465,6 +468,7 @@ vid_open(char *title, int width, int height, int scale, int flags)
     FWi_x.height = deviceinfo.height;
     w = FWi_x.width;
     h = FWi_x.height;
+fprintf(stderr, "Setting width and height to %d,%d\n", w, h);
     
     FW_info("[xvid] creating X video context [%dx%d]", w, h);
 
@@ -552,6 +556,8 @@ vid_blit(void)
     sh = FW_curinfo.height;
     dw = deviceinfo.width;
     dh = deviceinfo.height;
+
+    overlay(v, dw, dh);
 
     if (deviceinfo.scale == 1) {
         memcpy(FWi_x.ximage->data, v, dw * dh * 4);
