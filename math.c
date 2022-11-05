@@ -59,8 +59,8 @@ PL_set_camera(int x, int y, int z, int rx, int ry)
 	xf_vw.ty = -y;
 	xf_vw.tz = -z;
 	
-    xf_vw.rx = (unsigned int) (PL_TRIGMAX - (rx & PL_TRIGMSK));
-    xf_vw.ry = (unsigned int) (PL_TRIGMAX - (ry & PL_TRIGMSK));
+    xf_vw.rx = (unsigned int) ((PL_TRIGMAX - rx) & PL_TRIGMSK);
+    xf_vw.ry = (unsigned int) ((PL_TRIGMAX - ry) & PL_TRIGMSK);
 }
 
 extern void
