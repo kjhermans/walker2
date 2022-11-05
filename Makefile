@@ -1,5 +1,6 @@
 all:
-	cc -g -O3 -Wall -Wextra -o pl *.c fw/*.c -lX11 -lXext -lbtree
+	cc -g -O3 -Wall -Wextra -o pl *.c fw/*.c -lX11 -lXext
+#	cc -g -O3 -Wall -Wextra -o pl *.c fw/*.c -lX11 -lXext -lbtree
 
 clean:
 	rm -f ./pl

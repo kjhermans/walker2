@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <stdint.h>
+#include <string.h>
 
-#include <sdbm_tree/td.h>
+//#include <sdbm_tree/td.h>
 
 #include "world.h"
 #include "md5.h"
@@ -22,8 +23,8 @@ void pillar_set_seed
   seed = s;
 }
 
-static
-td_t pillardb;
+//static
+//td_t pillardb;
 
 int pillar_get_cached
   (int x, int z, struct pillar* p)
@@ -41,6 +42,16 @@ int pillar_get_cached
 void pillar_get_new
   (int x, int z, struct pillar* p)
 {
+
+/*
+  if ((x + z) % 2) {
+    *p = (struct pillar){ .block[ 0 ] = 1, .height = 1 };
+  } else {
+    *p = (struct pillar){ .block[ 0 ] = 0, .height = 0 };
+  }
+  return;
+*/
+
   unsigned char pillarseed[ 12 ];
   int32_t xx = x, zz = z;
   unsigned char rnd[ 16 ];
@@ -76,13 +87,15 @@ void pillar_get
 void pillar_init
   ()
 {
+/*
   char path[ 256 ];
 
-  snprintf(path, sizeof(path), "%s/.game.db", getenv("HOME"));
+  snprintf(path, sizeof(path), "%s/.walker2.db", getenv("HOME"));
   if (td_open(&pillardb, path, 0, O_RDWR|O_CREAT, 0644)) {
     fprintf(stderr, "Error opening db at '%s'\n", path);
     abort();
   }
+*/
   for (int i=0; i < FIELD_SIZE; i++) {
     for (int j=0; j < FIELD_SIZE; j++) {
       pillar_get_new(
