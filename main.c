@@ -67,14 +67,18 @@ EXT_error(int err_id, char *modname, char *msg)
 /* movement speed */
 #define MOVSPD 4
 
+#define JUMPSPEED 32
+#define TERMINALVELOCITY 64
+#define INITIALVELOCITY 8
+
 static struct PL_OBJ *floortile;
 static struct PL_OBJ *bluecube;
 static struct PL_OBJ *redcube;
 static struct PL_OBJ *yellowcube;
 static struct PL_OBJ *greencube;
-static int camrx = 1, camry = 1;
+static int camrx = 50, camry = 0;
 static int vv = 0;
-static int x = 0, y = 1000, z = 90;
+static int x = CUSZ/2, y = 4000, z = CUSZ/2;
 static struct PL_TEX checktex;
 static int checker[PL_REQ_TEX_DIM * PL_REQ_TEX_DIM];
 static unsigned fpsclock = 0;
@@ -155,14 +159,15 @@ update(void)
 
         if (pkb_key_held('w')) {
                 x += (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
-                y -= (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
+                //y -= (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
                 z += (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
         }
         if (pkb_key_held('s')) {
                 x -= (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
-                y += (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
+                //y += (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
                 z -= (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
         }
+/*
         if (pkb_key_held('a')) {
                 x -= (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
                 z += (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
@@ -177,6 +182,7 @@ update(void)
         if (pkb_key_held('g')) {
                 y -= MOVSPD;
         }
+*/
         if (pkb_key_held('l')) { /* 'level' */
                 camrx = 0;
         }
@@ -194,12 +200,14 @@ update(void)
                 }
                 PL_cull_mode = cmod;
         }
+/*
         if (pkb_key_held('1')) {
             PL_raster_mode = PL_FLAT;
         }
         if (pkb_key_held('2')) {
             PL_raster_mode = PL_TEXTURED;
         }
+*/
 
         if (pkb_key_pressed('3')) {
                 if (PL_fov == 8) {
@@ -210,21 +218,23 @@ update(void)
                 printf("fov: %d\n", PL_fov);
         }
 
-        if (pkb_key_pressed(' ')) { /* jump */
-          vv = -50;
+        if (pkb_key_pressed(' ') && vv == 0) { /* jump */
+          vv = -JUMPSPEED;
         }
 
   { /* perform falling check */
     int xx = (x + (CUSZ/2)) / CUSZ;
     int zz = (z + (CUSZ/2)) / CUSZ;
-    int yy = (y / CUSZ) - 1;
+    int yy = (y / CUSZ) - 2;
     struct pillar pillar;
     pillar_get(xx, zz, &pillar);
     if (yy < (int)(pillar.height)) {
       vv = 0;
-      y = ((pillar.height+1) * CUSZ) + 100;
+      y = ((pillar.height+2) * CUSZ);
     } else if (yy > (int)(pillar.height)) {
-      if (vv < 50) {
+      if (vv == 0) {
+        vv = INITIALVELOCITY;
+      } else if (vv < TERMINALVELOCITY) {
         vv++;
       }
     }
@@ -251,7 +261,6 @@ display(void)
   int xx = x / CUSZ;
   int zz = z / CUSZ;
   struct pillar pillar;
-  struct PL_OBJ* obj = NULL;
   for (int i = xx - (FIELD_SIZE/2); i < xx + (FIELD_SIZE/2); i++) {
     for (int j = zz - (FIELD_SIZE/2); j < zz + (FIELD_SIZE/2); j++) {
       { /* floortile */
@@ -264,9 +273,9 @@ display(void)
             PL_mst_pop();
       }
       pillar_get(i, j, &pillar);
-      for (unsigned k = 0; k < PILLAR_SIZE; k++) {
+      for (unsigned k = 0; k < pillar.height; k++) {
+        struct PL_OBJ* obj = NULL;
         switch (pillar.block[ k ]) {
-        case 0: goto BREAKPILLAR;
         case 1: obj = bluecube; break;
         case 2: obj = redcube; break;
         case 3: obj = yellowcube; break;
