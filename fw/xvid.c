@@ -538,6 +538,9 @@ resizevideo(unsigned *src, unsigned sw, unsigned sh,
     }
 }
 
+void overlay
+  (unsigned* buf, unsigned width, unsigned height);
+
 extern void
 vid_blit(void)
 {
