@@ -105,6 +105,11 @@ PL_init(int *video, int hres, int vres)
     /* 8-bit * 8-bit number multiplication table */
 	for (i = 0; i < 256; i++) {
         for (j = 0; j < 256; j++) {
+
+            /* fade to white */
+            //mul8[i][j] = ((255 - i) + j) > 255 ? 255 : ((255 - i) + j);
+
+            /* fade to black */
             mul8[i][j] = (unsigned char) ((i * j) >> 8);
         }
 	}
