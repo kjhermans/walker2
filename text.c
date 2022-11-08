@@ -4,6 +4,14 @@
 #include "text.h"
 #include "overlay.h"
 
+text_object_t* text_object_new
+  (unsigned x, unsigned y, char* t)
+{
+  text_object_t* result = calloc(1, sizeof(text_object_t));
+  text_object_init(result, x, y, t);
+  return result;
+}
+
 void text_object_init
   (text_object_t* o, unsigned x, unsigned y, char* t)
 {
@@ -31,12 +39,4 @@ void text_object_set_visibility
   (text_object_t* o, int visible)
 {
   o->visible = visible;
-}
-
-void text_object_render
-  (text_object_t* o, unsigned* buf, unsigned w, unsigned h)
-{
-  if (o->visible) {
-    overlay_string(buf, w, h, o->x, o->y, o->text);
-  }
 }

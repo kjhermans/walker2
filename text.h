@@ -9,6 +9,9 @@ typedef struct
 }
 text_object_t;
 
+text_object_t* text_object_new
+  (unsigned x, unsigned y, char* t);
+
 void text_object_init
   (text_object_t* o, unsigned x, unsigned y, char* t);
 

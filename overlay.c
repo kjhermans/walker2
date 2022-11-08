@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 
 #include "overlay.h"
@@ -121,13 +122,6 @@ void overlay_cross
   }
 }
 
-void overlay
-  (unsigned* buf, unsigned width, unsigned height)
-{
-  overlay_cross(buf, width, height);
-  overlay_string(buf, width, height, 20, 20, "hello");
-}
-
 void overlay_string
   (unsigned* buf, unsigned w, unsigned h, unsigned x, unsigned y, char* s)
 {
@@ -168,6 +162,36 @@ void overlay_string
       }
     }
     xx += 10;
+  }
+}
+
+textobjlist_t textobjects = { 0 };
+
+MAKE_ARRAY_CODE(text_object_t*, textobjlist_)
+
+text_object_t* overlay_add_textobject
+  (unsigned x, unsigned y, char* string)
+{
+  text_object_t* result = text_object_new(x, y, string);
+  textobjlist_push(&textobjects, result);
+  return result;
+}
+
+void overlay
+  (unsigned* buf, unsigned width, unsigned height)
+{
+  overlay_cross(buf, width, height);
+  for (unsigned i=0; i < textobjects.count; i++) {
+    if (textobjects.list[ i ]->visible) {
+      overlay_string(
+        buf,
+        width,
+        height,
+        textobjects.list[ i ]->x,
+        textobjects.list[ i ]->y,
+        textobjects.list[ i ]->text
+      );
+    }
   }
 }
 

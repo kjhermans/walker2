@@ -6,6 +6,7 @@
 
 //#include <sdbm_tree/td.h>
 
+#include "config.h"
 #include "world.h"
 #include "md5.h"
 
@@ -44,6 +45,15 @@ void pillar_get_new
 {
 
 /*
+  if ((x % 4) == 0 || (z % 4) == 0) {
+    *p = (struct pillar){ .block[ 0 ] = 1, .height = 1 };
+  } else {
+    *p = (struct pillar){ .block[ 0 ] = 0, .height = 0 };
+  }
+  return;
+*/
+
+/*
   if ((x + z) % 2) {
     *p = (struct pillar){ .block[ 0 ] = 1, .height = 1 };
   } else {
@@ -63,7 +73,7 @@ void pillar_get_new
 
   srand(*((unsigned*)rnd));
   for (unsigned i=0; i < PILLAR_SIZE; i++) {
-    if ((rand() % 4) == 0) {
+    if ((rand() % 2) == 0) {
       p->height = i;
       for (; i < PILLAR_SIZE; i++) {
         p->block[ i ] = 0;
@@ -82,6 +92,20 @@ void pillar_get
     return;
   }
   pillar_get_new(x, z, p);
+}
+
+void pillar_get_real
+  (int x, int z, struct pillar* p)
+{
+  int xx = x / CUSZ;
+  int zz = z / CUSZ;
+  if (x < 0) {
+    --xx;
+  }
+  if (z < 0) {
+    --zz;
+  }
+  pillar_get(xx, zz, p);
 }
 
 void pillar_init

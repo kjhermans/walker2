@@ -16,6 +16,7 @@ struct pillar
 
 void pillar_set_seed (uint32_t s);
 void pillar_get (int x, int z, struct pillar* p);
+void pillar_get_real (int x, int z, struct pillar* p);
 void pillar_init ();
 
 #endif
