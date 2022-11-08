@@ -1,6 +1,9 @@
-all:
+all: piccies
 	cc -g -O3 -Wall -Wextra -o pl *.c fw/*.c -lX11 -lXext
 #	cc -g -O3 -Wall -Wextra -o pl *.c fw/*.c -lX11 -lXext -lbtree
+
+piccies:
+	cd pics && make
 
 clean:
 	rm -f ./pl
